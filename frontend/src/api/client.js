@@ -1,6 +1,13 @@
 import { mockApi } from './mockStore';
 
-let isDemoMode = localStorage.getItem('school_demo_mode') === 'true';
+const isCloudHosted = typeof window !== 'undefined' && 
+  window.location.hostname !== 'localhost' && 
+  window.location.hostname !== '127.0.0.1';
+
+// Default to Demo Mode on cloud previews (Vercel) so visitors never see Mixed Content errors
+let isDemoMode = localStorage.getItem('school_demo_mode') !== null
+  ? localStorage.getItem('school_demo_mode') === 'true'
+  : isCloudHosted;
 
 export function setDemoMode(enabled) {
   isDemoMode = enabled;
@@ -61,7 +68,7 @@ async function request(path, options = {}) {
     if (err.status) {
       throw err;
     }
-    const networkError = new Error(`Unable to connect to backend server at ${getApiBase()}. If testing in cloud (Vercel), switch to Demo Mode or run the backend via Docker.`);
+    const networkError = new Error(`Unable to connect to backend server at ${getApiBase()}.`);
     networkError.status = 0;
     throw networkError;
   }

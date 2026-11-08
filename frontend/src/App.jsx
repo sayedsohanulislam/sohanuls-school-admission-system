@@ -40,10 +40,6 @@ export default function App() {
     setDemoMode(enabled);
     setDemoModeState(enabled);
     setAlert(null);
-    loadClasses();
-    if (isValidStudentId) {
-      loadMyHolds();
-    }
   };
 
   // Fetch all classes
@@ -55,7 +51,7 @@ export default function App() {
       console.error('Error fetching classes:', err);
       if (!getDemoMode()) {
         showAlert(
-          `Unable to reach backend API at ${getApiBase()}. (Note: On HTTPS sites like Vercel, browsers block HTTP localhost requests due to Mixed Content security rules).`,
+          `Unable to reach backend API at ${getApiBase()}. You can click the button below to switch to Interactive Cloud Mode.`,
           'danger'
         );
       }
@@ -92,7 +88,7 @@ export default function App() {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [loadClasses, loadMyHolds, isValidStudentId]);
+  }, [loadClasses, loadMyHolds, isValidStudentId, demoMode]);
 
   // Find the current active hold (HELD status and not expired)
   const currentActiveHold = useMemo(() => {
@@ -195,37 +191,43 @@ export default function App() {
       />
 
       <main className="container">
-        {/* Environment / Demo Banner */}
-        {demoMode ? (
-          <div className="alert alert-warning" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <span>
-              ⚡ <strong>Interactive Demo Mode Active:</strong> Simulating real-time seat holds, countdown timers, and admissions in-browser. (Ideal for testing on Vercel without a local .NET backend).
-            </span>
+        {/* Informational Mode Banner */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          padding: '0.6rem 1rem',
+          background: demoMode ? 'var(--primary-light)' : 'var(--gray-100)',
+          borderRadius: '8px',
+          marginBottom: '1.25rem',
+          border: '1px solid ' + (demoMode ? '#bfdbfe' : 'var(--gray-300)'),
+          fontSize: '0.85rem'
+        }}>
+          <div>
+            {demoMode ? (
+              <span>
+                ⚡ <strong>Interactive Cloud Preview:</strong> Simulating real-time seat reservation, countdown timers, and admissions in-browser.
+              </span>
+            ) : (
+              <span>
+                🔌 <strong>Local Backend Mode:</strong> Connecting to <code>{getApiBase()}</code>.
+              </span>
+            )}
+          </div>
+          <div>
             <button 
               className="btn-secondary-sm"
-              onClick={() => handleToggleDemoMode(false)}
+              onClick={() => handleToggleDemoMode(!demoMode)}
+              style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem' }}
             >
-              Switch to Live Backend Mode
+              {demoMode ? 'Switch to Local Backend Mode' : 'Switch to Cloud Demo Mode'}
             </button>
           </div>
-        ) : (
-          alert && alert.type === 'danger' && alert.message.includes('Unable to reach backend') && (
-            <div className="alert alert-warning" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <span>
-                💡 <strong>Testing on Vercel?</strong> Browsers block HTTPS pages from calling local HTTP backends (Mixed Content). You can activate Demo Mode to interact with the full UI right now.
-              </span>
-              <button 
-                className="btn btn-primary"
-                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8125rem' }}
-                onClick={() => handleToggleDemoMode(true)}
-              >
-                🚀 Enable Interactive Demo Mode
-              </button>
-            </div>
-          )
-        )}
+        </div>
 
-        {alert && (!demoMode || alert.type !== 'danger' || !alert.message.includes('Unable to reach backend')) && (
+        {alert && (
           <div className={`alert alert-${alert.type}`}>
             <span>{alert.message}</span>
             <button className="alert-close" onClick={() => setAlert(null)}>×</button>
