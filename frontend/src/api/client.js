@@ -1,7 +1,32 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+import { mockApi } from './mockStore';
+
+let isDemoMode = localStorage.getItem('school_demo_mode') === 'true';
+
+export function setDemoMode(enabled) {
+  isDemoMode = enabled;
+  localStorage.setItem('school_demo_mode', enabled ? 'true' : 'false');
+}
+
+export function getDemoMode() {
+  return isDemoMode;
+}
+
+export function getApiBase() {
+  return localStorage.getItem('school_backend_url') 
+    || import.meta.env.VITE_API_URL 
+    || 'http://localhost:8080';
+}
+
+export function setApiBase(url) {
+  if (url) {
+    localStorage.setItem('school_backend_url', url.trim());
+  } else {
+    localStorage.removeItem('school_backend_url');
+  }
+}
 
 async function request(path, options = {}) {
-  const url = `${API_BASE}${path}`;
+  const url = `${getApiBase()}${path}`;
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})
@@ -36,56 +61,48 @@ async function request(path, options = {}) {
     if (err.status) {
       throw err;
     }
-    const networkError = new Error('Unable to connect to the backend server. Please verify the API is running at http://localhost:8080.');
+    const networkError = new Error(`Unable to connect to backend server at ${getApiBase()}. If testing in cloud (Vercel), switch to Demo Mode or run the backend via Docker.`);
     networkError.status = 0;
     throw networkError;
   }
 }
 
 export const api = {
-  // 1. POST /classes
   createClass: (name, totalSeats) => 
-    request('/classes', {
+    isDemoMode ? mockApi.createClass(name, totalSeats) : request('/classes', {
       method: 'POST',
       body: JSON.stringify({ name, totalSeats: Number(totalSeats) })
     }),
 
-  // 2. GET /classes
   getClasses: () => 
-    request('/classes'),
+    isDemoMode ? mockApi.getClasses() : request('/classes'),
 
-  // 3. GET /classes/{classId}
   getClass: (classId) => 
-    request(`/classes/${classId}`),
+    isDemoMode ? mockApi.getClass(classId) : request(`/classes/${classId}`),
 
-  // 4. POST /classes/{classId}/holds
   createHold: (classId, studentId) => 
-    request(`/classes/${classId}/holds`, {
+    isDemoMode ? mockApi.createHold(classId, studentId) : request(`/classes/${classId}/holds`, {
       method: 'POST',
       headers: { 'X-Student-Id': studentId }
     }),
 
-  // 5. GET /holds/{holdId}
   getHold: (holdId) => 
-    request(`/holds/${holdId}`),
+    isDemoMode ? mockApi.getHold(holdId) : request(`/holds/${holdId}`),
 
-  // 6. POST /holds/{holdId}/confirm
   confirmHold: (holdId, studentId) => 
-    request(`/holds/${holdId}/confirm`, {
+    isDemoMode ? mockApi.confirmHold(holdId, studentId) : request(`/holds/${holdId}/confirm`, {
       method: 'POST',
       headers: { 'X-Student-Id': studentId }
     }),
 
-  // 7. DELETE /holds/{holdId}
   cancelHold: (holdId, studentId) => 
-    request(`/holds/${holdId}`, {
+    isDemoMode ? mockApi.cancelHold(holdId, studentId) : request(`/holds/${holdId}`, {
       method: 'DELETE',
       headers: { 'X-Student-Id': studentId }
     }),
 
-  // 8. GET /me/holds
   getMyHolds: (studentId) => 
-    request('/me/holds', {
+    isDemoMode ? mockApi.getMyHolds(studentId) : request('/me/holds', {
       headers: { 'X-Student-Id': studentId }
     })
 };

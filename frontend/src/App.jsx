@@ -4,7 +4,7 @@ import CreateClassModal from './components/CreateClassModal';
 import ClassList from './components/ClassList';
 import ActiveHoldCard from './components/ActiveHoldCard';
 import MyApplications from './components/MyApplications';
-import { api } from './api/client';
+import { api, getDemoMode, setDemoMode, getApiBase } from './api/client';
 
 export default function App() {
   const [studentId, setStudentId] = useState(() => {
@@ -15,6 +15,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('student');
   const [alert, setAlert] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [demoMode, setDemoModeState] = useState(getDemoMode());
 
   // Validate 17-digit student birth registration ID
   const isValidStudentId = useMemo(() => {
@@ -35,6 +36,16 @@ export default function App() {
     }
   };
 
+  const handleToggleDemoMode = (enabled) => {
+    setDemoMode(enabled);
+    setDemoModeState(enabled);
+    setAlert(null);
+    loadClasses();
+    if (isValidStudentId) {
+      loadMyHolds();
+    }
+  };
+
   // Fetch all classes
   const loadClasses = useCallback(async () => {
     try {
@@ -42,6 +53,12 @@ export default function App() {
       setClasses(data);
     } catch (err) {
       console.error('Error fetching classes:', err);
+      if (!getDemoMode()) {
+        showAlert(
+          `Unable to reach backend API at ${getApiBase()}. (Note: On HTTPS sites like Vercel, browsers block HTTP localhost requests due to Mixed Content security rules).`,
+          'danger'
+        );
+      }
     }
   }, []);
 
@@ -178,7 +195,37 @@ export default function App() {
       />
 
       <main className="container">
-        {alert && (
+        {/* Environment / Demo Banner */}
+        {demoMode ? (
+          <div className="alert alert-warning" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <span>
+              ⚡ <strong>Interactive Demo Mode Active:</strong> Simulating real-time seat holds, countdown timers, and admissions in-browser. (Ideal for testing on Vercel without a local .NET backend).
+            </span>
+            <button 
+              className="btn-secondary-sm"
+              onClick={() => handleToggleDemoMode(false)}
+            >
+              Switch to Live Backend Mode
+            </button>
+          </div>
+        ) : (
+          alert && alert.type === 'danger' && alert.message.includes('Unable to reach backend') && (
+            <div className="alert alert-warning" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <span>
+                💡 <strong>Testing on Vercel?</strong> Browsers block HTTPS pages from calling local HTTP backends (Mixed Content). You can activate Demo Mode to interact with the full UI right now.
+              </span>
+              <button 
+                className="btn btn-primary"
+                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8125rem' }}
+                onClick={() => handleToggleDemoMode(true)}
+              >
+                🚀 Enable Interactive Demo Mode
+              </button>
+            </div>
+          )
+        )}
+
+        {alert && (!demoMode || alert.type !== 'danger' || !alert.message.includes('Unable to reach backend')) && (
           <div className={`alert alert-${alert.type}`}>
             <span>{alert.message}</span>
             <button className="alert-close" onClick={() => setAlert(null)}>×</button>
