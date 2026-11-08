@@ -1,14 +1,29 @@
 # School Admission System (High-Concurrency Seat Reservation)
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://sohanuls-school-admission-system.vercel.app)
+[![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](#-quick-start-docker)
+[![.NET 8](https://img.shields.io/badge/.NET_8-Web_API-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
 A production-ready, containerized School Admission System built for high-traffic, first-come-first-served (FCFS) seat reservations and admission fee processing without lottery. Designed to handle peak registration surges while strictly guaranteeing zero seat overbooking.
 
 Developed for **Onnorokom Projukti Limited** Take-Home Assignment (Assistant Software Engineer recruitment).
 
 ---
 
+## 🌐 Live Interactive Preview (Vercel)
+
+You can review and interact with the application live in your browser:
+
+🔗 **Live Deployment:** **[https://sohanuls-school-admission-system.vercel.app](https://sohanuls-school-admission-system.vercel.app)**
+
+> **Cloud Preview Note:** When visited on Vercel, the app automatically runs in **Interactive Cloud Mode** with full in-browser simulation (dynamic seat quotas, 17-digit student ID validation, live expiration countdown timers, fee confirmations, and cancellations). To test the full-stack system with the actual .NET 8 Web API and PostgreSQL database, run the Docker Compose setup below.
+
+---
+
 ## 🚀 Quick Start (Docker)
 
-The entire application (PostgreSQL, .NET 8 Backend, and React Frontend) can be launched with a single command without installing any local runtimes or databases:
+The entire full-stack application (PostgreSQL, .NET 8 Backend, and React Frontend) can be launched with a single command without installing local runtimes or databases:
 
 ```bash
 docker compose up --build
