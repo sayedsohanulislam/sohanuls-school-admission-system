@@ -1,31 +1,31 @@
 # AI USAGE REPORT
-**Project:** School Admission System  
+**Project:** School Admission System (High-Concurrency Seat Reservation)  
 **Author:** Sayed Sohanul Islam  
 
 ---
 
-### ১. কোন AI টুল এবং কোন অংশে ব্যবহার করা হয়েছে:
-- **ব্যবহৃত টুল:** Antigravity / Gemini & GitHub Copilot
-- **যেসব ক্ষেত্রে সহযোগিতা নেওয়া হয়েছে:**
-  - .NET 8 Web API-এর প্রজেক্ট স্কাফোল্ডিং এবং DTO/মডেল কাঠামো নির্ধারণ।
-  - রিঅ্যাক্ট কম্পোনেন্টসমূহ (কাউন্টডাউন টাইমার, টেবিল এবং মডার্ন সিএসএস লেআউট) দ্রুত তৈরি।
-  - xUnit টেস্ট কেস এবং কনকারেন্সি টেস্টের জন্য সমান্তরাল রিকোয়েস্ট সিমুলেশন স্ক্রিপ্ট প্রস্তুতকরণ।
+### 1. AI Tools Utilized and Scope of Use
+- **Tools:** Antigravity / Gemini & GitHub Copilot
+- **Scope of Use:**
+  - Generating initial boilerplate templates for ASP.NET Core controllers, EF Core entity models, and DTO contracts.
+  - Scaffolding the React 18 / Vite component layout and modern CSS styles.
+  - Designing automated xUnit concurrency test routines to simulate multi-threaded HTTP load.
 
 ---
 
-### ২. AI কোথায় ভুল করেছিল এবং কীভাবে তা চিহ্নিত ও সমাধান করা হয়েছে:
+### 2. Issues Encountered with AI Suggestions and How They Were Resolved
 
-#### ক. ডিস্ট্রিবিউটেড কনকারেন্সি ও মাল্টি-প্রসেস লকিং সমস্যা
-- **AI-এর প্রস্তাব:** এআই প্রথমে সি-শার্পের ইন-মেমোরি `lock` বা মেমোরি সেমাফোর দিয়ে রেস কন্ডিশন মোকাবিলার পরামর্শ দেয়।
-- **সমস্যা:** স্পেসিফিকেশনের বোনাস শর্ত অনুযায়ী একই ডাটাবেসে একাধিক backend প্রসেস আলাদা পোর্টে চললে ইন-মেমোরি লক কোনো কাজে আসবে না এবং ডাটাবেস লেভেলে ওভারবুকিং ঘটে যাবে।
-- **সংশোধন:** ডাটাবেস লেভেলে PostgreSQL-এর রো-লেভেল পেসিমিস্টিক লক (`SELECT ... FOR UPDATE`) এবং এক্সপ্লিসিট ট্রানজ্যাকশন প্রয়োগ করা হয়েছে। এতে যেকোনো সংখ্যক প্রসেস থেকে একই সাথে রিকোয়েস্ট আসলেও আসন সংখ্যা কোনো অবস্থাতেই সীমা অতিক্রম করতে পারে না।
+#### A. Inadequate Distributed Multi-Process Concurrency Protection
+- **Initial AI Suggestion:** The AI originally suggested using an in-process C# lock (`SemaphoreSlim` or `lock (object)`) to protect against overbooking.
+- **Problem Identified:** While an in-process lock works on a single backend instance, it fails completely across distributed processes or multi-container deployments sharing the same database (the assignment's bonus requirement). Concurrent requests landing on different instances would overbook seats.
+- **Resolution:** Replaced the in-process-only approach with PostgreSQL row-level pessimistic locking (`SELECT ... FOR UPDATE`) inside an atomic database transaction. This enforces strict serialization at the database layer across any number of backend processes.
 
-#### খ. সিটের মেয়াদ (TTL) শেষ হওয়া সংক্রান্ত বিলম্ব
-- **AI-এর প্রস্তাব:** এআই মেয়াদোত্তীর্ণ আসন মুক্ত করার জন্য শুধুমাত্র প্রতি ৩০ সেকেন্ডে চলা একটি ব্যাকগ্রাউন্ড জব বা ক্রনের উপর নির্ভর করছিল।
-- **সমস্যা:** এর ফলে সিটের মেয়াদ শেষ হওয়ার পর ব্যাকগ্রাউন্ড জব রান না হওয়া পর্যন্ত পরবর্তী শিক্ষার্থী আসন খালি দেখতে পেত না।
-- **সংশোধন:** প্রতিটি আসন গণনা কোয়েরিতে ডায়নামিক টাইম ফিল্টারিং (`ExpiresAt > NOW() AND Status = 'HELD'`) যুক্ত করা হয়েছে। এর ফলে মিলি-সেকেন্ডের ব্যবধানেও মেয়াদ শেষ হওয়া মাত্রই আসনটি স্বয়ংক্রিয়ভাবে মুক্ত হয়ে যায়।
+#### B. Latency in Seat Release due to Cron Dependency
+- **Initial AI Suggestion:** The AI initially relied solely on a periodic background timer (running every 30–60 seconds) to find expired holds and update their status to `EXPIRED`.
+- **Problem Identified:** If a hold expired between intervals, the seat would remain blocked for other applicants until the background job executed, leading to stale availability metrics.
+- **Resolution:** Updated all seat-counting queries to dynamically filter by `ExpiresAt > DateTime.UtcNow && Status == 'HELD'`. This guarantees seats become immediately available at the exact millisecond of TTL expiration, while retaining the background service strictly for asynchronous database cleanup.
 
-#### গ. শিক্ষার্থীর ১৭ অঙ্কের জন্ম নিবন্ধন নম্বর ভ্যালিডেশন
-- **AI-এর প্রস্তাব:** এআই হেডারের ভ্যালু সরাসরি চেক না করেই প্রসেস করছিল।
-- **সমস্যা:** স্পেক অনুযায়ী ভুল ইনপুটে কখোনোই 500 দেওয়া যাবে না, 4xx দিতে হবে।
-- **সংশোধন:** রেগুলার এক্সপ্রেশন (`^\d{17}$`) দিয়ে কড়া ভ্যালিডেশন বসানো হয়েছে, যাতে ১৭ অঙ্কের সংখ্যার কম বা বেশি হলে বা বর্ণ থাকলে সঙ্গে সঙ্গে ক্লায়েন্ট ফ্রেন্ডলি `400 Bad Request` রেসপন্স দেওয়া যায়।
+#### C. Incomplete Validation of the 17-Digit Student ID
+- **Initial AI Suggestion:** The AI accepted any arbitrary non-empty string for the `X-Student-Id` header.
+- **Problem Identified:** The specification strictly mandates a 17-digit birth registration number and requires all invalid client inputs to return `4xx` responses rather than unhandled errors.
+- **Resolution:** Implemented explicit regular expression validation (`^\d{17}$`) on both the backend middleware/action filters and the frontend input controls, returning HTTP `400 Bad Request` with descriptive error messaging on invalid input.

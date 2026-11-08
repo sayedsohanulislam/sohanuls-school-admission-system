@@ -12,20 +12,20 @@ export default function Header({ studentId, setStudentId, isValidStudentId }) {
     <header className="app-header">
       <div className="header-inner">
         <div className="brand">
-          <div className="brand-icon">ভ</div>
+          <div className="brand-icon">SA</div>
           <div>
-            <h1 className="brand-title">অনলাইন স্কুল ভর্তি সিস্টেম</h1>
-            <p className="brand-subtitle">School Admission System · First-Come, First-Served</p>
+            <h1 className="brand-title">School Admission System</h1>
+            <p className="brand-subtitle">High-Concurrency Seat Reservation · First-Come, First-Served</p>
           </div>
         </div>
 
         <div className="student-bar">
-          <label htmlFor="student-id-input">শিক্ষার্থীর ১৭ অঙ্কের জন্ম নিবন্ধন নম্বর:</label>
+          <label htmlFor="student-id-input">Student 17-Digit Birth Registration ID:</label>
           <input
             id="student-id-input"
             type="text"
             className="student-input"
-            placeholder="১৭ অঙ্কের নম্বর দিন"
+            placeholder="17-digit ID"
             maxLength={17}
             value={studentId}
             onChange={(e) => setStudentId(e.target.value.replace(/\D/g, ''))}
@@ -34,13 +34,13 @@ export default function Header({ studentId, setStudentId, isValidStudentId }) {
             type="button" 
             className="btn-secondary-sm"
             onClick={generateRandomStudentId}
-            title="পরীক্ষার জন্য একটি ডেমো ১৭ অঙ্কের আইডি তৈরি করুন"
+            title="Generate a random 17-digit test ID"
           >
-            🎲 ডেমো আইডি
+            🎲 Demo ID
           </button>
           {studentId && (
             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: isValidStudentId ? 'var(--success)' : 'var(--danger)' }}>
-              {isValidStudentId ? '✓ সঠিক আইডি' : `(${studentId.length}/17 অঙ্ক)`}
+              {isValidStudentId ? '✓ Valid ID' : `(${studentId.length}/17 digits)`}
             </span>
           )}
         </div>

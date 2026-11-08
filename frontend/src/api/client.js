@@ -36,7 +36,7 @@ async function request(path, options = {}) {
     if (err.status) {
       throw err;
     }
-    const networkError = new Error('সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি। অনুগ্রহ করে নিশ্চিত করুন backend চালু আছে।');
+    const networkError = new Error('Unable to connect to the backend server. Please verify the API is running at http://localhost:8080.');
     networkError.status = 0;
     throw networkError;
   }

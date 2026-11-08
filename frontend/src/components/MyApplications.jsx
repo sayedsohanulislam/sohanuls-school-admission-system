@@ -20,10 +20,10 @@ export default function MyApplications({
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'HELD': return '⏳ আসন সংরক্ষিত (HELD)';
-      case 'CONFIRMED': return '✓ ভর্তি নিশ্চিত (CONFIRMED)';
-      case 'EXPIRED': return '⌛ মেয়াদ উত্তীর্ণ (EXPIRED)';
-      case 'CANCELLED': return '✕ বাতিলকৃত (CANCELLED)';
+      case 'HELD': return '⏳ HELD';
+      case 'CONFIRMED': return '✓ CONFIRMED';
+      case 'EXPIRED': return '⌛ EXPIRED';
+      case 'CANCELLED': return '✕ CANCELLED';
       default: return status;
     }
   };
@@ -31,9 +31,9 @@ export default function MyApplications({
   if (!isValidStudentId) {
     return (
       <div className="card">
-        <div className="card-title">আমার আবেদনসমূহ (My Applications)</div>
+        <div className="card-title">My Applications</div>
         <div className="empty-state">
-          <p>আপনার আবেদনসমূহ দেখতে উপরে সঠিক ১৭ অঙ্কের জন্ম নিবন্ধন নম্বর দিন।</p>
+          <p>Please enter a valid 17-digit birth registration ID in the header to view your applications.</p>
         </div>
       </div>
     );
@@ -42,26 +42,26 @@ export default function MyApplications({
   return (
     <div className="card">
       <div className="card-title">
-        <span>আমার আবেদনসমূহ (My Applications)</span>
+        <span>My Applications</span>
         <span style={{ fontSize: '0.85rem', color: 'var(--gray-600)' }}>
-          শিক্ষার্থী আইডি: <code style={{ fontWeight: 600 }}>{studentId}</code>
+          Student ID: <code style={{ fontWeight: 600 }}>{studentId}</code>
         </span>
       </div>
 
       {myHolds.length === 0 ? (
         <div className="empty-state">
-          <p>এই আইডির বিপরীতে এখনো কোনো আবেদন করা হয়নি। ক্লাস তালিকা থেকে আবেদন করুন।</p>
+          <p>No applications found for this student ID. Browse available classes to apply.</p>
         </div>
       ) : (
         <div className="table-responsive">
           <table className="data-table">
             <thead>
               <tr>
-                <th>হোল্ড আইডি</th>
-                <th>ক্লাস ও শিফট</th>
-                <th>অবস্থা (Status)</th>
-                <th>মেয়াদ শেষ হওয়ার সময়</th>
-                <th>পদক্ষেপ (Actions)</th>
+                <th>Hold ID</th>
+                <th>Class & Shift</th>
+                <th>Status</th>
+                <th>Expires At</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -88,7 +88,7 @@ export default function MyApplications({
                             onClick={() => onConfirm(h.holdId)}
                             disabled={isProcessing}
                           >
-                            💳 ফি দিন
+                            💳 Pay Fee
                           </button>
                           <button
                             className="btn btn-danger"
@@ -96,7 +96,7 @@ export default function MyApplications({
                             onClick={() => onCancel(h.holdId)}
                             disabled={isProcessing}
                           >
-                            ✕ বাতিল
+                            ✕ Cancel
                           </button>
                         </div>
                       )}

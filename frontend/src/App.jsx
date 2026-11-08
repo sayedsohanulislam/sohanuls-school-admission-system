@@ -41,7 +41,6 @@ export default function App() {
       const data = await api.getClasses();
       setClasses(data);
     } catch (err) {
-      // Do not spam alerts on periodic poll failure
       console.error('Error fetching classes:', err);
     }
   }, []);
@@ -87,7 +86,7 @@ export default function App() {
   // Handle Apply (Create Hold)
   const handleApply = async (classId) => {
     if (!isValidStudentId) {
-      showAlert('আবেদন করতে অনুগ্রহ করে উপরে সঠিক ১৭ অঙ্কের জন্ম নিবন্ধন নম্বর দিন।', 'warning');
+      showAlert('Please enter a valid 17-digit student birth registration ID in the header to apply.', 'warning');
       return;
     }
 
@@ -96,16 +95,16 @@ export default function App() {
 
     try {
       const response = await api.createHold(classId, studentId);
-      showAlert(`আসন সাময়িকভাবে সংরক্ষিত হয়েছে (হোল্ড আইডি: ${response.holdId})। নির্ধারিত সময়ের মধ্যে ভর্তি ফি প্রদান করুন।`, 'success');
+      showAlert(`Seat held successfully! (Hold ID: ${response.holdId}). Please pay the admission fee before the timer expires.`, 'success');
       await Promise.all([loadClasses(), loadMyHolds()]);
       setActiveTab('student');
     } catch (err) {
       if (err.status === 409) {
-        showAlert('দুঃখিত! এই ক্লাসে কোনো আসন খালি নেই অথবা এই ক্লাসে ইতিমধ্যে আপনার একটি সক্রিয় আবেদন রয়েছে।', 'danger');
+        showAlert('Application rejected: No seats are currently available or you already hold an active reservation/admission in this class.', 'danger');
       } else if (err.status === 400) {
-        showAlert('অনুরোধটি সঠিক নয়। ১৭ অঙ্কের জন্ম নিবন্ধন নম্বর নিশ্চিত করুন।', 'danger');
+        showAlert('Invalid input: The X-Student-Id must be a valid 17-digit birth registration number.', 'danger');
       } else {
-        showAlert(err.message || 'আবেদন করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।', 'danger');
+        showAlert(err.message || 'Failed to submit application. Please try again.', 'danger');
       }
     } finally {
       setIsProcessing(false);
@@ -121,10 +120,10 @@ export default function App() {
 
     try {
       await api.confirmHold(holdId, studentId);
-      showAlert('ভর্তি ফি সফলভাবে জমা হয়েছে এবং ভর্তি নিশ্চিত হয়েছে!', 'success');
+      showAlert('Payment successful! Your admission has been confirmed.', 'success');
       await Promise.all([loadClasses(), loadMyHolds()]);
     } catch (err) {
-      showAlert(err.message || 'ভর্তি ফি প্রদানে সমস্যা হয়েছে। আসনটির মেয়াদ শেষ হয়ে থাকতে পারে।', 'danger');
+      showAlert(err.message || 'Failed to process admission fee. The hold reservation may have expired.', 'danger');
       await Promise.all([loadClasses(), loadMyHolds()]);
     } finally {
       setIsProcessing(false);
@@ -135,7 +134,7 @@ export default function App() {
   const handleCancel = async (holdId) => {
     if (!isValidStudentId) return;
 
-    if (!window.confirm('আপনি কি নিশ্চিত যে আবেদনটি বাতিল করতে চান? আসনটি পুনরায় উন্মুক্ত হয়ে যাবে।')) {
+    if (!window.confirm('Are you sure you want to cancel this reservation? The seat will be released immediately.')) {
       return;
     }
 
@@ -144,10 +143,10 @@ export default function App() {
 
     try {
       await api.cancelHold(holdId, studentId);
-      showAlert('আবেদন বাতিল করা হয়েছে এবং আসনটি মুক্ত করা হয়েছে।', 'warning');
+      showAlert('Reservation cancelled and seat released.', 'warning');
       await Promise.all([loadClasses(), loadMyHolds()]);
     } catch (err) {
-      showAlert(err.message || 'আবেদন বাতিল করতে সমস্যা হয়েছে।', 'danger');
+      showAlert(err.message || 'Failed to cancel reservation.', 'danger');
     } finally {
       setIsProcessing(false);
     }
@@ -160,11 +159,11 @@ export default function App() {
 
     try {
       const newClass = await api.createClass(name, totalSeats);
-      showAlert(`নতুন ক্লাস "${newClass.name}" (${newClass.totalSeats} আসন) সফলভাবে তৈরি করা হয়েছে!`, 'success');
+      showAlert(`Class "${newClass.name}" with ${newClass.totalSeats} seats was created successfully!`, 'success');
       await loadClasses();
       setActiveTab('student');
     } catch (err) {
-      showAlert(err.message || 'ক্লাস তৈরি করতে সমস্যা হয়েছে।', 'danger');
+      showAlert(err.message || 'Failed to create class.', 'danger');
     } finally {
       setIsProcessing(false);
     }
@@ -202,19 +201,19 @@ export default function App() {
             className={`tab-btn ${activeTab === 'student' ? 'active' : ''}`}
             onClick={() => setActiveTab('student')}
           >
-            🏫 ভর্তি ও আসন তালিকা (Admissions)
+            🏫 Classes & Admissions
           </button>
           <button 
             className={`tab-btn ${activeTab === 'my-holds' ? 'active' : ''}`}
             onClick={() => setActiveTab('my-holds')}
           >
-            📋 আমার আবেদনসমূহ ({myHolds.length})
+            📋 My Applications ({myHolds.length})
           </button>
           <button 
             className={`tab-btn ${activeTab === 'admin' ? 'active' : ''}`}
             onClick={() => setActiveTab('admin')}
           >
-            ⚙️ স্কুল অ্যাডমিন (ক্লাস যোগ করুন)
+            ⚙️ School Admin (Add Class)
           </button>
         </div>
 

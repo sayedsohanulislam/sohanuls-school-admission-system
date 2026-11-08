@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import Header from './components/Header';
@@ -16,9 +16,9 @@ describe('Frontend Component Tests', () => {
       />
     );
 
-    expect(screen.getByText(/অনলাইন স্কুল ভর্তি সিস্টেম/i)).toBeInTheDocument();
+    expect(screen.getByText(/School Admission System/i)).toBeInTheDocument();
     expect(screen.getByDisplayValue('20261234567890123')).toBeInTheDocument();
-    expect(screen.getByText('✓ সঠিক আইডি')).toBeInTheDocument();
+    expect(screen.getByText('✓ Valid ID')).toBeInTheDocument();
   });
 
   it('ActiveHoldCard displays countdown and action buttons for HELD status', () => {
@@ -42,15 +42,15 @@ describe('Frontend Component Tests', () => {
       />
     );
 
-    expect(screen.getByText(/আসন সংরক্ষিত \(HELD\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Seat Reserved \(HELD\)/i)).toBeInTheDocument();
     expect(screen.getByText('h_test123')).toBeInTheDocument();
     
-    const confirmBtn = screen.getByText(/ভর্তি ফি দিন/i);
+    const confirmBtn = screen.getByText(/Pay Admission Fee/i);
     expect(confirmBtn).not.toBeDisabled();
     fireEvent.click(confirmBtn);
     expect(onConfirm).toHaveBeenCalledWith('h_test123');
 
-    const cancelBtn = screen.getByText(/বাতিল করুন/i);
+    const cancelBtn = screen.getByText(/Cancel Reservation/i);
     expect(cancelBtn).not.toBeDisabled();
     fireEvent.click(cancelBtn);
     expect(onCancel).toHaveBeenCalledWith('h_test123');
@@ -60,9 +60,9 @@ describe('Frontend Component Tests', () => {
     const onCreateClass = vi.fn();
     render(<CreateClassModal onCreateClass={onCreateClass} isProcessing={false} />);
 
-    const nameInput = screen.getByPlaceholderText(/যেমন: Class 6 – Morning Shift/i);
-    const seatsInput = screen.getByLabelText(/মোট আসন সংখ্যা/i);
-    const submitBtn = screen.getByText(/ক্লাস যোগ করুন/i);
+    const nameInput = screen.getByPlaceholderText(/e.g. Class 6 – Morning Shift/i);
+    const seatsInput = screen.getByLabelText(/Total Seats/i);
+    const submitBtn = screen.getByRole('button', { name: /Create Class/i });
 
     fireEvent.change(nameInput, { target: { value: 'Class 10 - Science' } });
     fireEvent.change(seatsInput, { target: { value: '75' } });

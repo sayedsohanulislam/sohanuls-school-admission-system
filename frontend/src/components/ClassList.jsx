@@ -21,15 +21,15 @@ export default function ClassList({
   return (
     <div className="card">
       <div className="card-title">
-        <span>উপলব্ধ ক্লাস ও শিফট তালিকা (Class & Shift List)</span>
+        <span>Available Classes & Shifts</span>
         <span style={{ fontSize: '0.8125rem', fontWeight: 500, color: 'var(--gray-600)' }}>
-          🔄 প্রতি ৩ সেকেন্ড পর পর আসন স্বয়ংক্রিয়ভাবে আপডেট হচ্ছে
+          🔄 Real-time seat updates every 3s
         </span>
       </div>
 
       {classes.length === 0 ? (
         <div className="empty-state">
-          <p>বর্তমানে কোনো ক্লাস তৈরি করা নেই। স্কুল অ্যাডমিন ট্যাব থেকে নতুন ক্লাস যোগ করুন।</p>
+          <p>No classes created yet. Switch to the School Admin tab to add classes.</p>
         </div>
       ) : (
         <div className="class-grid">
@@ -46,19 +46,19 @@ export default function ClassList({
                   <div className="seat-stats">
                     <div className="stat-item">
                       <span className="stat-value">{cls.totalSeats}</span>
-                      <span className="stat-label">মোট</span>
+                      <span className="stat-label">Total</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value held">{cls.heldSeats}</span>
-                      <span className="stat-label">হোল্ড</span>
+                      <span className="stat-label">Held</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value">{cls.confirmedSeats}</span>
-                      <span className="stat-label">নিশ্চিত</span>
+                      <span className="stat-label">Confirmed</span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-value available">{cls.availableSeats}</span>
-                      <span className="stat-label">খালি</span>
+                      <span className="stat-label">Available</span>
                     </div>
                   </div>
                 </div>
@@ -66,13 +66,13 @@ export default function ClassList({
                 <div>
                   {hasExistingAdmission && (
                     <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginBottom: '0.5rem', fontWeight: 600 }}>
-                      ⚠️ এই ক্লাসে ইতিমধ্যে আপনার সক্রিয় আবেদন রয়েছে।
+                      ⚠️ You already have an active hold or confirmed admission in this class.
                     </p>
                   )}
 
                   {!isValidStudentId && (
                     <p style={{ fontSize: '0.75rem', color: 'var(--gray-600)', marginBottom: '0.5rem' }}>
-                      আবেদন করতে উপরে ১৭ অঙ্কের জন্ম নিবন্ধন নম্বর দিন।
+                      Enter your 17-digit birth registration ID in the header to apply.
                     </p>
                   )}
 
@@ -82,7 +82,7 @@ export default function ClassList({
                     onClick={() => onApply(cls.id)}
                     disabled={!canApply}
                   >
-                    {isFull ? '❌ আসন খালি নেই (Full)' : '📝 আবেদন করুন (Apply Now)'}
+                    {isFull ? '❌ No Seats Available (Full)' : '📝 Apply for Seat (Hold)'}
                   </button>
                 </div>
               </div>

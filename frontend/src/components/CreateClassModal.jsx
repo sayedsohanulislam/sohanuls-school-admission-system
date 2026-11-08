@@ -19,10 +19,10 @@ export default function CreateClassModal({ onCreateClass, isProcessing }) {
   return (
     <div className="card">
       <div className="card-title">
-        <span>নতুন ক্লাস / শিফট তৈরি করুন (School Admin)</span>
+        <span>Create Class & Shift (School Admin)</span>
       </div>
       <p style={{ fontSize: '0.875rem', color: 'var(--gray-600)', marginBottom: '1rem' }}>
-        প্রতিটি শিফট আলাদা একটি ক্লাস হিসেবে যুক্ত হবে এবং তার নিজস্ব আসন সংখ্যা থাকবে।
+        Each shift is treated as an independent class entity with its own dedicated seat allocation.
       </p>
 
       {/* Preset shortcuts */}
@@ -32,32 +32,32 @@ export default function CreateClassModal({ onCreateClass, isProcessing }) {
           className="btn-secondary-sm"
           onClick={() => handleQuickFill('Class 6 – Morning Shift', 120)}
         >
-          + Class 6 – Morning (120)
+          + Class 6 – Morning (120 seats)
         </button>
         <button 
           type="button" 
           className="btn-secondary-sm"
           onClick={() => handleQuickFill('Class 6 – Day Shift', 120)}
         >
-          + Class 6 – Day (120)
+          + Class 6 – Day (120 seats)
         </button>
         <button 
           type="button" 
           className="btn-secondary-sm"
           onClick={() => handleQuickFill('Class 9 – Science Morning', 80)}
         >
-          + Class 9 – Science (80)
+          + Class 9 – Science (80 seats)
         </button>
       </div>
 
       <form onSubmit={handleSubmit} className="form-grid">
         <div className="form-group">
-          <label htmlFor="className">ক্লাস ও শিফটের নাম</label>
+          <label htmlFor="className">Class & Shift Name</label>
           <input
             id="className"
             type="text"
             className="form-control"
-            placeholder="যেমন: Class 6 – Morning Shift"
+            placeholder="e.g. Class 6 – Morning Shift"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -65,7 +65,7 @@ export default function CreateClassModal({ onCreateClass, isProcessing }) {
         </div>
 
         <div className="form-group">
-          <label htmlFor="totalSeats">মোট আসন সংখ্যা</label>
+          <label htmlFor="totalSeats">Total Seats</label>
           <input
             id="totalSeats"
             type="number"
@@ -83,7 +83,7 @@ export default function CreateClassModal({ onCreateClass, isProcessing }) {
           className="btn btn-primary"
           disabled={isProcessing || !name.trim() || totalSeats <= 0}
         >
-          {isProcessing ? 'তৈরি হচ্ছে...' : '➕ ক্লাস যোগ করুন'}
+          {isProcessing ? 'Creating...' : '➕ Create Class'}
         </button>
       </form>
     </div>
